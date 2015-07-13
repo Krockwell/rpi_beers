@@ -3,10 +3,6 @@ A beer app.
 
 
 TODO:
-Interface for server
-Setup a script to startup server
-Move python to Daemon
-Authentication
+Move python to Daemon for updating temperature
 
-Add relays to handle temperature control
 
