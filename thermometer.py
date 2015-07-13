@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import glob
 import time
@@ -30,6 +31,9 @@ def read_temp():
 		temp_f = temp_c * 9.0 / 5.0 + 32.0
 		return temp_c, temp_f
 
-#while True:
-#	print(read_temp())
-#	time.sleep(1)
+print "Content-type: text/html\n\n"
+print "<h1>Welcome to Rockwell Brewing\n<h1>"
+
+body_text = "Current temperature of fermenter 1 is " + str(read_temp()[1]) + " F."
+print "<b2>%s<b2>" % body_text
+
