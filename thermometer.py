@@ -13,17 +13,6 @@ device_folder = glob.glob(base_dir + '28*')[0]
 device_file = device_folder + '/w1_slave'
 
 
-LOG_FILENAME = '/tmp/temperature.log'
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-handler = logging.handlers.WatchedFileHandler(LOG_FILENAME, 'w')
-formatter = logging.Formatter("%(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-  
-
 def __init__(self):
 	self.hello = "hey duuude"
 
@@ -48,10 +37,12 @@ def read_temp():
 #print "Content-type: text/html\n\n"
 #print "<h1>Welcome to Rockwell Brewing\n<h1>"
 
-#print "<b2>%s<b2>" % body_text
 
+
+#Writes the temperature to a file every 2 seconds
 while True:
-	time.sleep(5)
-	body_text = "Current temperature of fermenter 1 is " + str(read_temp()[1]) + " F."	
-	logger.info(body_text)
+	body_text = "Current temperature of fermenter 1 is " + str(read_temp()[1]) + " F.\n"	
+	with open('./temperature.log', 'w') as f:
+		f.write(body_text)
+	time.sleep(2)
 
