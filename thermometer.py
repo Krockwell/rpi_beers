@@ -2,6 +2,8 @@
 import os
 import glob
 import time
+import logging
+import logging.handlers
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -9,6 +11,18 @@ os.system('modprobe w1-therm')
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28*')[0]
 device_file = device_folder + '/w1_slave'
+
+
+LOG_FILENAME = '/tmp/temperature.log'
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+handler = logging.handlers.WatchedFileHandler(LOG_FILENAME, 'w')
+formatter = logging.Formatter("%(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+  
 
 def __init__(self):
 	self.hello = "hey duuude"
@@ -31,9 +45,13 @@ def read_temp():
 		temp_f = temp_c * 9.0 / 5.0 + 32.0
 		return temp_c, temp_f
 
-print "Content-type: text/html\n\n"
-print "<h1>Welcome to Rockwell Brewing\n<h1>"
+#print "Content-type: text/html\n\n"
+#print "<h1>Welcome to Rockwell Brewing\n<h1>"
 
-body_text = "Current temperature of fermenter 1 is " + str(read_temp()[1]) + " F."
-print "<b2>%s<b2>" % body_text
+#print "<b2>%s<b2>" % body_text
+
+while True:
+	time.sleep(5)
+	body_text = "Current temperature of fermenter 1 is " + str(read_temp()[1]) + " F."	
+	logger.info(body_text)
 
