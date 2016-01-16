@@ -5,8 +5,8 @@ import time
 import logging
 import logging.handlers
 
-os.system('modprobe w1-gpio')
-os.system('modprobe w1-therm')
+os.system('/sbin/modprobe w1-gpio')
+os.system('/sbin/modprobe w1-therm')
 
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28*')[0]
@@ -34,15 +34,22 @@ def read_temp():
 		temp_f = temp_c * 9.0 / 5.0 + 32.0
 		return temp_c, temp_f
 
-#print "Content-type: text/html\n\n"
-#print "<h1>Welcome to Rockwell Brewing\n<h1>"
+#Setup the Logger
+logger = logging.getLogger('Probe_1')
+logger.setLevel(logging.DEBUG)
+
+console_handler = logging.FileHandler(filename='temperature.log',mode='a')
+console_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
 
 
 
 #Writes the temperature to a file every 2 seconds
 while True:
-	body_text = "Current temperature of fermenter 1 is " + str(read_temp()[1]) + " F.\n"	
-	with open('./temperature.log', 'w') as f:
-		f.write(body_text)
-	time.sleep(2)
+	logger.info('%f', read_temp()[1])
+	time.sleep(60)
 
