@@ -3,7 +3,7 @@ A beer app.
 
 
 TODO:
-Move python to Daemon for updating temperature
+Plot the log files perhaps
 
 Tutorials Used in setting this up:
 http://readwrite.com/2014/06/27/raspberry-pi-web-server-website-hosting
