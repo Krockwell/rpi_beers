@@ -1,5 +1,5 @@
 # rpi_beers
-A beer app.
+A beer app based on the Raspberry Pi.
 
 The idea of this device is to monitor the temperature of the fermenting beer in my freezer. Eventually I would like to control the temperature by turning the freezer on/off, to plot the temperature over time, and finally to setup different temperature profiles for better fermentation control...and to push it onto the web somehow.
 
