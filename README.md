@@ -4,13 +4,21 @@ A beer app based on the Raspberry Pi.
 The idea of this device is to monitor the temperature of the fermenting beer in my freezer. This should help make tasty beer.
 
 TODO:
+<<<<<<< HEAD
 Create a webserver using NodeJS
 Figure out how to plot using NodeJS
 Figure out long term data storage
+=======
+Change attributes via the webpage: graph parameters, probe names. 
+Generate n graphs without a seperate generate script for each one
+Fix repository to enable a clean pull
+>>>>>>> b009a4aabed1476510573a988f16e148d1172c97
 
 Tutorials Used in setting this up:
 Setting up Remote Desktop and NodeJS: http://thisdavej.com/beginners-guide-to-installing-node-js-on-a-raspberry-pi/
 Setting up the Temp Probe: https://learn.adafruit.com/adafruits-raspberry-pi-lesson-11-ds18b20-temperature-sensing
+Setting up GNUPlot: http://raspberrypi.tomasgreno.cz/plotting-graphs.html
+
 
 Articles I read while looking for the appropriate method of displaying this info on a webserver
 http://readwrite.com/2014/06/27/raspberry-pi-web-server-website-hosting
