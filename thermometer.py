@@ -44,23 +44,26 @@ def read_temp(number):
 
 #Setup the Logger
 logger = []
+console_handler = []
+
+formatter = logging.Formatter('%(asctime)s %(message)s', "%Y-%m-%d %H:%M:%S")
+
 for probe_number in range(probe_count):
 	logger.append(logging.getLogger('Probe' + str(probe_number)))
 	logger[probe_number].setLevel(logging.DEBUG)
-
-console_handler = logging.FileHandler(filename='temperature.log',mode='a')
-console_handler.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s, %(message)s')
-console_handler.setFormatter(formatter)
+	
+	probe_filename = 'logs/temperature_p' + str(probe_number) + '.log'
+	console_handler.append(logging.FileHandler(filename=probe_filename,mode='a'))
+	console_handler[probe_number].setLevel(logging.DEBUG)
+	console_handler[probe_number].setFormatter(formatter)
 
 for probe_number in range(probe_count):
-	logger[probe_number].addHandler(console_handler)
+	logger[probe_number].addHandler(console_handler[probe_number])
 
 
 #Writes the temperature to a file every 2 seconds
 while True:
 	for probe_number in range(probe_count):
-		logger[probe_number].info('Probe %s: %f', probe_number, read_temp(probe_number)[1])
+		logger[probe_number].info('%f', read_temp(probe_number)[1])
 	time.sleep(60)
 

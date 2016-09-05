@@ -4,8 +4,9 @@ A beer app based on the Raspberry Pi.
 The idea of this device is to monitor the temperature of the fermenting beer in my freezer. This should help make tasty beer.
 
 TODO:
-Figure out how to plot temperature vs time.
-Figure out how to put on web-page for non-linux people to use.
+Create a webserver using NodeJS
+Figure out how to plot using NodeJS
+Figure out long term data storage
 
 Tutorials Used in setting this up:
 Setting up Remote Desktop and NodeJS: http://thisdavej.com/beginners-guide-to-installing-node-js-on-a-raspberry-pi/
