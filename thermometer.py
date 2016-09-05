@@ -52,7 +52,7 @@ for probe_number in range(probe_count):
 	logger.append(logging.getLogger('Probe' + str(probe_number)))
 	logger[probe_number].setLevel(logging.DEBUG)
 	
-	probe_filename = 'logs/temperature_p' + str(probe_number) + '.log'
+	probe_filename = 'logs/temperature_p' + str(probe_number + 1) + '.log'
 	console_handler.append(logging.FileHandler(filename=probe_filename,mode='a'))
 	console_handler[probe_number].setLevel(logging.DEBUG)
 	console_handler[probe_number].setFormatter(formatter)
@@ -61,7 +61,7 @@ for probe_number in range(probe_count):
 	logger[probe_number].addHandler(console_handler[probe_number])
 
 
-#Writes the temperature to a file every 2 seconds
+#Writes the temperature to a file every 60 seconds
 while True:
 	for probe_number in range(probe_count):
 		logger[probe_number].info('%f', read_temp(probe_number)[1])
