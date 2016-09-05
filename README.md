@@ -4,10 +4,9 @@ A beer app based on the Raspberry Pi.
 The idea of this device is to monitor the temperature of the fermenting beer in my freezer. This should help make tasty beer.
 
 TODO:
-Change attributes via the webpage
-  graph parameters
-  probe names
+Change attributes via the webpage: graph parameters, probe names. 
 Generate n graphs without a seperate generate script for each one
+Fix repository to enable a clean pull
 
 Tutorials Used in setting this up:
 Setting up Remote Desktop and NodeJS: http://thisdavej.com/beginners-guide-to-installing-node-js-on-a-raspberry-pi/
