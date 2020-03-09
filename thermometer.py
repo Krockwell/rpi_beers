@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import os
 import glob
-import time
+from time import sleep
+import RPi.GPIO as GPIO
+import datetime
 import logging
 import logging.handlers
 
@@ -19,16 +21,14 @@ for folder in device_folders:
 	probe_count += 1
 	device_files.append(folder + '/w1_slave')
 
-
-def __init__(self):
-	self.hello = "hey duuude"
-
+#reads temperature from a provided probe number
 def read_temp_raw(number):
 	f = open(device_files[number], 'r')
 	lines = f.readlines()
 	f.close()
 	return lines
 
+#reads temperature, provides real temp values
 def read_temp(number):
 	lines = read_temp_raw(number)
 
@@ -52,7 +52,7 @@ for probe_number in range(probe_count):
 	logger.append(logging.getLogger('Probe' + str(probe_number)))
 	logger[probe_number].setLevel(logging.DEBUG)
 	
-	probe_filename = 'logs/temperature_p' + str(probe_number + 1) + '.log'
+	probe_filename = 'Fermenter_Website/logs/temperature_p' + str(probe_number + 1) + '.log'
 	console_handler.append(logging.FileHandler(filename=probe_filename,mode='a'))
 	console_handler[probe_number].setLevel(logging.DEBUG)
 	console_handler[probe_number].setFormatter(formatter)
@@ -61,9 +61,46 @@ for probe_number in range(probe_count):
 	logger[probe_number].addHandler(console_handler[probe_number])
 
 
-#Writes the temperature to a file every 60 seconds
+def init_relay():
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(2, GPIO.OUT)
+	print('initializing')
+        return
+
+def turn_on_relay():
+        GPIO.output(2, GPIO.HIGH)
+	print('turn on')
+        return
+
+def turn_off_relay():
+        GPIO.output(2, GPIO.LOW)
+	print('turn off')
+        return
+
+
+#Writes the temperature to a file
+#if the temperature is higher than the setpoint, turn on the fridge
+set_point = 68
+last_turn_on = datetime.datetime.now()
+relay_status = 0
+init_relay()
 while True:
+	sleep(30)	
+	current_temp = read_temp(probe_number)[1]
+	current_time = datetime.datetime.now()
+	print(current_temp, current_time, relay_status)
+	if current_temp > set_point:
+		#Turn on after waiting for compressor delay
+		if current_time - last_turn_on > datetime.timedelta(minutes=10):
+			turn_on_relay()
+			relay_status = 1
+			print(current_temp, current_time, relay_status)
+			last_turn_on = datetime.datetime.now()
+	else:
+		relay_status = 0
+		print(current_temp, current_time, relay_status)
+		turn_off_relay()
 	for probe_number in range(probe_count):
-		logger[probe_number].info('%f', read_temp(probe_number)[1])
-	time.sleep(60)
+		logger[probe_number].info('%f %d', current_temp, relay_status)
+		
 
