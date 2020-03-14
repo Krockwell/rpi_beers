@@ -87,28 +87,34 @@ def turn_off_relay():
         return
 
 
+def generate_calendar(set_points):
+	#Create a schedule given current date/time and provided steps           
+        next_time_step = datetime.datetime.now()
+        calendar = {}
+        for lines in set_points:
+                temp_step, time_step = lines.rstrip('\n').split(',')
+                next_time_step = next_time_step + datetime.timedelta(days=int(time_step))
+
+                #create a calendar, assumes only one temp change per day
+		calendar[next_time_step.strftime("%d %b %Y ")] = [temp_step] 
+	return calendar
+
 #----Main---
 #TODO:
-# Need way to pass set points into program, updateable
-# Need to hook this up to cherrypy
+#1. Need to hook this up to cherrypy
+#2. calendar resets when program is re-run, needs to be more static
+#2a.Input file -> intermediate generated calendar file -> loaded by default into program
+#2b.IF program is run with no input file/argument, the current calendar is used
 
 def main():
-	
+		
 	#Assumes arguments are written properly
 	if len(sys.argv) > 1:
 		set_points = read_file(sys.argv[1])
+		calendar = generate_calendar(set_points)
 	else:
 		print("No setpoints given")
-
-	#Create a schedule given current date/time and provided steps		
-	next_time_step = datetime.datetime.now()
-	for lines in set_points:
-		temp_step, time_step = lines.rstrip('\n').split(',')
-		next_time_step = next_time_step + datetime.timedelta(days=int(time_step))		
 		
-		#TODO: create a calendar of events 
-		print next_time_step, temp_step 
-	
 	#Initialize temperature probes
 	device_file_list,probe_count = init_probe()
 
@@ -121,12 +127,17 @@ def main():
 	last_turn_on = datetime.datetime.now()
 	relay_status = 0
 	init_relay()
+	i = 0
 	while True:
-		sleep(30)	
+		sleep(30)
 		current_temp = read_temp(device_file_list, 0)[1]
 		current_time = datetime.datetime.now()
-		print(current_temp, current_time, relay_status)
-		print (set_point - 2)
+		current_date = current_time.strftime("%d %b %Y ")
+
+		#Use calendar to get new set_point
+		if current_date in calendar:
+			set_point = calendar[current_date]
+					
 		if current_temp > set_point:
 			#Turn on after waiting for compressor delay
 			if current_time - last_turn_on > datetime.timedelta(minutes=10):
