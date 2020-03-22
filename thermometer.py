@@ -7,7 +7,8 @@ import RPi.GPIO as GPIO
 import datetime
 import logging
 import logging.handlers
-
+import argparse
+import json
 
 #Initialize temperature probes
 #returns count and list of probe locations in filesystem
@@ -107,48 +108,61 @@ def generate_calendar(set_points):
 #2b.IF program is run with no input file/argument, the current calendar is used
 
 def main():
-		
-	#Assumes arguments are written properly
-	if len(sys.argv) > 1:
-		set_points = read_file(sys.argv[1])
-		calendar = generate_calendar(set_points)
+	
+	current_date = datetime.datetime.now().strftime("%d %b %Y ")
+	#Argument parser
+	parser = argparse.ArgumentParser(description='Controls fementation station with given set_points.')
+	parser.add_argument('--setpoint', metavar='s', type=int, help='integer representing setpoint in farenheit')
+	parser.add_argument('--calendar') 
+	args = parser.parse_args()
+	
+	#Use calendar to find set_point, otherwise use set_point arguement
+	if args.calendar is not None:
+		with open(args.calendar) as calendar_file:
+			calendar = json.load(calendar_file)
+			if current_date in calendar:
+				set_point = calendar[current_date]
+			else:
+				#Use a safe temp??
+				set_point = 65
 	else:
-		print("No setpoints given")
-		
+		set_point = args.setpoint
+	
+	print(set_point)
+
 	#Initialize temperature probes
-	device_file_list,probe_count = init_probe()
+	#device_file_list,probe_count = init_probe()
 
 	#Initialize telemetry logger
-	logger = init_logger(probe_count)
+	#logger = init_logger(probe_count)
 
-	#Writes the temperature to a file
 	#if the temperature is higher than the setpoint, turn on the fridge
-	set_point = 68
-	last_turn_on = datetime.datetime.now()
-	relay_status = 0
-	init_relay()
-	i = 0
-	while True:
-		sleep(30)
-		current_temp = read_temp(device_file_list, 0)[1]
-		current_time = datetime.datetime.now()
-		current_date = current_time.strftime("%d %b %Y ")
+	
+	#last_turn_on = datetime.datetime.now()
+	#relay_status = 0
+	#init_relay()
+	#i = 0
+	#while True:
+	#	sleep(30)
+	#	current_temp = read_temp(device_file_list, 0)[1]
+	#	current_time = datetime.datetime.now()
+	#	current_date = current_time.strftime("%d %b %Y ")
 
-		#Use calendar to get new set_point
-		if current_date in calendar:
-			set_point = calendar[current_date]
+		#Use calendparser = argparse.ArgumentParser(description='Process some integers.')ar to get new set_point
+		#if current_date in calendar:
+		#	set_point = calendar[current_date]
 					
-		if current_temp > set_point:
-			#Turn on after waiting for compressor delay
-			if current_time - last_turn_on > datetime.timedelta(minutes=10):
-				turn_on_relay()
-				relay_status = 1
-				last_turn_on = datetime.datetime.now()
-		elif current_temp < set_point - 2 :
-			relay_status = 0
-			turn_off_relay()
-		for probe_number in range(probe_count):
-			logger[0].info('%f %d', current_temp, relay_status)
+	#	if current_temp > set_point:
+	#		#Turn on after waiting for compressor delay
+	#		if current_time - last_turn_on > datetime.timedelta(minutes=10):
+	#			turn_on_relay()
+	#			relay_status = 1
+	#			last_turn_on = datetime.datetime.now()
+	#	elif current_temp < set_point - 2 :
+	#		relay_status = 0
+	#		turn_off_relay()
+	#	for probe_number in range(probe_count):
+	#		logger[0].info('%f %d', current_temp, relay_status)
 		
 
 if __name__ == "__main__":
