@@ -79,13 +79,13 @@ def init_relay():
 
 def turn_on_relay():
         GPIO.output(2, GPIO.HIGH)
-	print('turn on')
-        return
+	print('Relay turned on')
+        return 1
 
 def turn_off_relay():
         GPIO.output(2, GPIO.LOW)
-	print('turn off')
-        return
+	print('Relay turned off')
+        return 0
 
 
 def generate_calendar(set_points):
@@ -100,12 +100,18 @@ def generate_calendar(set_points):
 		calendar[next_time_step.strftime("%d %b %Y ")] = [temp_step] 
 	return calendar
 
+def adjust_temp(current_temp, set_point, logger):
+	if current_temp > set_point:
+		relay_status = turn_on_relay()
+	elif current_temp < set_point - 2 :
+		relay_status = turn_off_relay()
+	else:
+		relay_status = turn_on_relay()
+	return relay_status
+
 #----Main---
 #TODO:
 #1. Need to hook this up to cherrypy
-#2. calendar resets when program is re-run, needs to be more static
-#2a.Input file -> intermediate generated calendar file -> loaded by default into program
-#2b.IF program is run with no input file/argument, the current calendar is used
 
 def main():
 	
@@ -121,49 +127,46 @@ def main():
 		with open(args.calendar) as calendar_file:
 			calendar = json.load(calendar_file)
 			if current_date in calendar:
-				set_point = calendar[current_date]
+				set_point = int(calendar[current_date])
 			else:
 				#Use a safe temp??
 				set_point = 65
 	else:
 		set_point = args.setpoint
 	
-	print(set_point)
-
 	#Initialize temperature probes
-	#device_file_list,probe_count = init_probe()
+	device_file_list,probe_count = init_probe()
 
 	#Initialize telemetry logger
-	#logger = init_logger(probe_count)
+	logger = init_logger(probe_count)
+
+	#Initialize relay
+	init_relay()
+
 
 	#if the temperature is higher than the setpoint, turn on the fridge
-	
-	#last_turn_on = datetime.datetime.now()
-	#relay_status = 0
-	#init_relay()
-	#i = 0
-	#while True:
-	#	sleep(30)
-	#	current_temp = read_temp(device_file_list, 0)[1]
-	#	current_time = datetime.datetime.now()
-	#	current_date = current_time.strftime("%d %b %Y ")
+	last_adjustment = datetime.datetime.now()
+	while True:
 
-		#Use calendparser = argparse.ArgumentParser(description='Process some integers.')ar to get new set_point
-		#if current_date in calendar:
-		#	set_point = calendar[current_date]
-					
-	#	if current_temp > set_point:
-	#		#Turn on after waiting for compressor delay
-	#		if current_time - last_turn_on > datetime.timedelta(minutes=10):
-	#			turn_on_relay()
-	#			relay_status = 1
-	#			last_turn_on = datetime.datetime.now()
-	#	elif current_temp < set_point - 2 :
-	#		relay_status = 0
-	#		turn_off_relay()
-	#	for probe_number in range(probe_count):
-	#		logger[0].info('%f %d', current_temp, relay_status)
-		
+		#Update set-point if needed
+		current_date = datetime.datetime.now().strftime("%d %b %Y ")
+		if args.calendar is not None:
+			if current_date in calendar:
+				set_point = int(calendar[current_date])                        
+			else:
+				print "Warning: Calendar is out of date! Maintaining last setpoint"
+
+		#log temperature at 1 hz
+		sleep(1)
+		current_temp = read_temp(device_file_list, 0)[1]
+				
+		#Adjust fridge every 3 mins
+		if datetime.datetime.now() - last_adjustment > datetime.timedelta(minutes=3):
+			last_adjustment = datetime.datetime.now()
+			relay_status = adjust_temp(current_temp, set_point, logger)
+			#print("setpoint:%f, temp:%f, relay:%d", set_point, current_temp, relay_status)
+			for probe_number in range(probe_count):
+                		logger[0].info('%f %f %d', current_temp, set_point, relay_status)
 
 if __name__ == "__main__":
 	main()
