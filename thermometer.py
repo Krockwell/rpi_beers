@@ -100,7 +100,7 @@ def generate_calendar(set_points):
 		calendar[next_time_step.strftime("%d %b %Y ")] = [temp_step] 
 	return calendar
 
-def adjust_temp(current_temp, set_point, logger):
+def adjust_temp(current_temp, set_point):
 	if current_temp > set_point:
 		relay_status = turn_on_relay()
 	elif current_temp < set_point - 2 :
@@ -146,6 +146,7 @@ def main():
 
 	#if the temperature is higher than the setpoint, turn on the fridge
 	last_adjustment = datetime.datetime.now()
+	relay_status = 0
 	while True:
 
 		#Update set-point if needed
@@ -159,14 +160,13 @@ def main():
 		#log temperature at 1 hz
 		sleep(1)
 		current_temp = read_temp(device_file_list, 0)[1]
+		for probe_number in range(probe_count):
+                	logger[0].info('%f %f %d', current_temp, set_point, relay_status)
 				
 		#Adjust fridge every 3 mins
 		if datetime.datetime.now() - last_adjustment > datetime.timedelta(minutes=3):
 			last_adjustment = datetime.datetime.now()
-			relay_status = adjust_temp(current_temp, set_point, logger)
-			#print("setpoint:%f, temp:%f, relay:%d", set_point, current_temp, relay_status)
-			for probe_number in range(probe_count):
-                		logger[0].info('%f %f %d', current_temp, set_point, relay_status)
+			relay_status = adjust_temp(current_temp, set_point)
 
 if __name__ == "__main__":
 	main()
